@@ -1,9 +1,13 @@
+import { BannerAd } from "@/components/ads/banner";
 import { colors } from "@/constants/theme";
+import { useInterstitialAd } from "@/hooks/use-interstitial";
+import { useRewardedAd } from "@/hooks/use-rewareded";
 import { useShare } from "@/hooks/use-share";
 import { useQuoteStore } from "@/store/quote-store";
 import { MaterialCommunityIcons } from "@expo/vector-icons/";
 import { useState } from "react";
 import {
+  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -15,10 +19,17 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Index() {
   const [index, setIndex] = useState(0);
   const [isReady, setIsReady] = useState(false);
+  const [tapCount, setTapCount] = useState(0);
 
   const quote = useQuoteStore((state) => state.quote);
   const nextQuote = useQuoteStore((state) => state.nextQuote);
   const prevQuote = useQuoteStore((state) => state.prevQuote);
+
+  const canGoBack = useQuoteStore((state) => state.canGoBack); // implement logic in your store
+  const unlockPrev = useQuoteStore((state) => state.unlockPrev);
+
+  const { showInterstitialAd } = useInterstitialAd();
+  const { showRewardedAd } = useRewardedAd();
 
   const toggleLike = useQuoteStore((s) => s.toggleLike);
   const liked = useQuoteStore((s) => s.liked);
@@ -29,12 +40,49 @@ export default function Index() {
 
   const isLiked = liked.includes(currentQuote);
 
+  const handleNext = () => {
+    nextQuote();
+    const newCount = tapCount + 1;
+    setTapCount(newCount);
+
+    if (newCount % 10 === 0) {
+      // Show ad here
+      console.log("Show ad here");
+      showInterstitialAd();
+    }
+  };
+
+  // if (!canGoBack()) {
+  //   showRewardedAd(() => unlockPrev());
+  //   return;
+  // }
+  // prevQuote();
+
+  const handlePrev = () => {
+    if (canGoBack()) {
+      prevQuote();
+      return;
+    }
+
+    Alert.alert("Unlock Previous", "Watch a short ad to go back further", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Watch Ad",
+        onPress: () => {
+          showRewardedAd(() => {
+            unlockPrev(); // this now runs ONLY after reward
+          });
+        },
+      },
+    ]);
+  };
+
   return (
     <SafeAreaView edges={["bottom"]} style={styles.container}>
       <View style={styles.wrapper}>
         <Pressable
           style={({ pressed }) => [styles.quoteArea, pressed && styles.pressed]}
-          onPress={nextQuote}
+          onPress={handleNext}
         >
           {/* <Text style={styles.quoteText}>Quote of the day:</Text> */}
           <Text style={styles.quoteText}>{currentQuote}</Text>
@@ -48,7 +96,7 @@ export default function Index() {
         </Pressable>
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity disabled onPress={() => console.log("prev")}>
+          <TouchableOpacity onPress={handlePrev}>
             <MaterialCommunityIcons
               name="history"
               size={24}
@@ -72,7 +120,9 @@ export default function Index() {
             />
           </TouchableOpacity>
         </View>
+        {/* <BannerAd /> */}
       </View>
+      <BannerAd />
     </SafeAreaView>
   );
 }
@@ -81,6 +131,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.surface,
+    alignItems: "center",
+    // justifyContent: "center",
   },
   wrapper: {
     flex: 1,
@@ -142,16 +194,3 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
 });
-
-// const handlePrev = () => {
-//   Alert.alert("Unlock Previous", "Watch a short ad to go back further", [
-//     { text: "Cancel", style: "cancel" },
-//     {
-//       text: "Watch Ad",
-//       onPress: () => {
-//         console.log("Show ad here");
-//         prevQuote();
-//       },
-//     },
-//   ]);
-// };

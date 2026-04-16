@@ -1,10 +1,29 @@
 import { colors } from "@/constants/theme";
 import { Feather, MaterialIcons } from "@expo/vector-icons/";
 import { router, Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { TouchableOpacity } from "react-native";
+import mobileAds from "react-native-google-mobile-ads";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+// SplashScreen.preventAutoHideAsync();
+
+SplashScreen.setOptions({
+  duration: 400,
+  fade: true,
+});
+
 export default function RootLayout() {
+  mobileAds()
+    .initialize()
+    .then((adapterStatuses) => {
+      // Initialization complete!
+      console.log("AdMob initialized", adapterStatuses);
+    })
+    .catch((error) => {
+      console.error("AdMob initialization failed", error);
+    });
+
   return (
     <SafeAreaProvider>
       <Stack

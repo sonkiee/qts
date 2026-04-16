@@ -20,6 +20,10 @@ type QuoteStore = {
 
   setIndex: (index: number) => void;
   //   currentQuote: string;
+
+  // ---- Rewarded Ad logic ----
+  canGoBack: () => boolean;
+  unlockPrev: () => void;
 };
 
 export const useQuoteStore = create<QuoteStore>()(
@@ -41,6 +45,18 @@ export const useQuoteStore = create<QuoteStore>()(
           : [...liked, quote];
 
         set({ liked: updated });
+      },
+
+      canGoBack: () => {
+        const { index } = get();
+        return index > 0;
+      },
+
+      unlockPrev: () => {
+        const { index, quotes } = get();
+        // unlock all previous quotes (allow going back fully)
+        set({ index: quotes.length - 1, quote: quotes[quotes.length - 1] });
+        // optional: you could also implement a separate "unlockedHistory" array if you want fine-grained control
       },
 
       setIndex: (i) =>
