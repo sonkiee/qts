@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout repo
@@ -53,7 +53,6 @@ jobs:
 
       # 🚀 RUN LOCAL EAS BUILD
       - name: Run EAS Local Build (Android APK)
-        # run: eas build --platform android --local --profile development --non-interactive
         run: eas build --platform android --local --profile preview --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
