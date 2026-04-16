@@ -1,0 +1,73 @@
+import { quotes } from "@/constants/quotes";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+export default function Index() {
+  const [index, setIndex] = useState(0);
+  const [isReady, setIsReady] = useState(false);
+  const [liked, setLiked] = useState([]);
+
+  // Load saved index
+  useEffect(() => {
+    (async () => {
+      try {
+        const savedIndex = await AsyncStorage.getItem("index");
+        const parsed = Number(savedIndex);
+        if (!isNaN(parsed) && parsed >= 0 && parsed < quotes.length) {
+          setIndex(parsed);
+        } else {
+          setIndex(0); // Default to 0 if saved index is invalid
+        }
+      } catch (error) {
+        console.log("Failed to load index", error);
+      } finally {
+        setIsReady(true);
+      }
+    })();
+  }, []);
+
+  // Save index whenever it changes
+  useEffect(() => {
+    if (!isReady) return; // Don't save until we've loaded the initial index
+
+    (async () => {
+      try {
+        await AsyncStorage.setItem("index", index.toString());
+      } catch (error) {
+        console.log("Failed to save to index", error);
+      }
+    })();
+  }, [index, isReady]);
+
+  const currentQuote = quotes?.[index] ?? "Loading quote...";
+
+  return (
+    <View style={styles.container}>
+      <Text>{currentQuote}</Text>
+
+      <TouchableOpacity>
+        <Text
+          onPress={() => {
+            setIndex((prev) => {
+              const nextIndex = (prev + 1) % quotes.length;
+              console.log("nextIndex:", nextIndex);
+              return nextIndex;
+            });
+          }}
+        >
+          Next Quote
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 20,
+  },
+});
