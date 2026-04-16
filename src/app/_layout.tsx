@@ -17,7 +17,7 @@ export default function RootLayout() {
   mobileAds()
     .initialize()
     .then((adapterStatuses) => {
-      // Initialization complete!
+      // Initializations complete!
       console.log("AdMob initialized", adapterStatuses);
     })
     .catch((error) => {
