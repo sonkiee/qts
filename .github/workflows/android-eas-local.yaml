@@ -53,15 +53,19 @@ jobs:
 
       # 🚀 RUN LOCAL EAS BUILD
       - name: Run EAS Local Build (Android APK)
-        run: eas build --platform android --local --non-interactive
+        run: eas build --platform android --local --profile development --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      # 🧪 Debug (VERY useful)
+      - name: Show build files
+        run: ls -lah
 
       # 📦 Upload APK artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk
+          name: android-build
           path: |
-            *.apk
-            android/app/build/outputs/apk/**/*.apk
+            build-*.apk
+            build-*.aab
