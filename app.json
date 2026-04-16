@@ -40,7 +40,8 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-9176654196604776~3252366408"
+          "androidAppId": "ca-app-pub-9176654196604776~3252366408",
+          "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
         }
       ]
     ],
@@ -53,6 +54,7 @@
       "eas": {
         "projectId": "68dea0b9-67d3-4cb9-9731-a0f0459c9763"
       }
-    }
+    },
+    "owner": "sonkey"
   }
 }
