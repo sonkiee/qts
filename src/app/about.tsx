@@ -1,13 +1,31 @@
 import { colors } from "@/constants/theme";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import * as WebBrowser from "expo-web-browser";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const links = ["privacy policy", "terms of service", "contact us"];
+const links = [
+  {
+    title: "Privacy Policy",
+    url: "https://lock-in-page.pages.dev/privacy-policy",
+  },
+  { title: "Terms of Service", url: "https://lock-in-page.pages.dev/terms" },
+  { title: "Contact Us", url: "https://lock-in-page.pages.dev/contact" },
+];
 
 export default function AboutScreen() {
-  const handlePress = (link: string) => {
-    console.log(`Pressed: ${link}`);
-    // later: navigation or linking logic
+  const openWebLink = async (url: string) => {
+    try {
+      const result = await WebBrowser.openBrowserAsync(url, {
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
+      });
+
+      if (result.type === "cancel") {
+        console.log("User closed the web browser");
+      }
+    } catch (error) {
+      console.error("Failed to open link:", error);
+      Linking.openURL(url);
+    }
   };
 
   return (
@@ -19,14 +37,14 @@ export default function AboutScreen() {
       <View style={styles.linksContainer}>
         {links.map((link) => (
           <Pressable
-            key={link}
-            onPress={() => handlePress(link)}
+            key={link.url}
+            onPress={() => openWebLink(link.url)}
             style={({ pressed }) => [
               styles.linkItem,
               pressed && styles.linkPressed,
             ]}
           >
-            <Text style={styles.linkText}>{link}</Text>
+            <Text style={styles.linkText}>{link.title}</Text>
           </Pressable>
         ))}
       </View>

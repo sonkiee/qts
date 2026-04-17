@@ -1,5 +1,5 @@
 {
-  "name": "qts",
+  "name": "lock-in-daily-quotes",
   "main": "expo-router/entry",
   "version": "0.0.1",
   "scripts": {

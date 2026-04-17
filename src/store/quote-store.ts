@@ -1,4 +1,5 @@
 import { quotes } from "@/constants/quotes";
+import { shuffleArray } from "@/utils/shuffle";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -28,63 +29,67 @@ type QuoteStore = {
 
 export const useQuoteStore = create<QuoteStore>()(
   persist(
-    (set, get) => ({
-      quotes,
-      index: 0,
-      quote: quotes[0],
+    (set, get) => {
+      const shuffledQuotes = shuffleArray(quotes); // You can shuffle the quotes here if needed
 
-      liked: [],
+      return {
+        quotes: shuffledQuotes,
+        index: 0,
+        quote: shuffledQuotes[0],
 
-      isLiked: (quote) => get().liked.includes(quote),
+        liked: [],
 
-      toggleLike: (quote) => {
-        const { liked } = get();
+        isLiked: (quote) => get().liked.includes(quote),
 
-        const updated = liked.includes(quote)
-          ? liked.filter((q) => q !== quote)
-          : [...liked, quote];
+        toggleLike: (quote) => {
+          const { liked } = get();
 
-        set({ liked: updated });
-      },
+          const updated = liked.includes(quote)
+            ? liked.filter((q) => q !== quote)
+            : [...liked, quote];
 
-      canGoBack: () => {
-        const { index } = get();
-        return index > 0;
-      },
+          set({ liked: updated });
+        },
 
-      unlockPrev: () => {
-        const { index, quotes } = get();
-        // unlock all previous quotes (allow going back fully)
-        set({ index: quotes.length - 1, quote: quotes[quotes.length - 1] });
-        // optional: you could also implement a separate "unlockedHistory" array if you want fine-grained control
-      },
+        canGoBack: () => {
+          const { index } = get();
+          return index > 0;
+        },
 
-      setIndex: (i) =>
-        set({
-          index: i,
-          quote: quotes[i],
-        }),
+        unlockPrev: () => {
+          const { index, quotes } = get();
+          // unlock all previous quotes (allow going back fully)
+          set({ index: quotes.length - 1, quote: quotes[quotes.length - 1] });
+          // optional: you could also implement a separate "unlockedHistory" array if you want fine-grained control
+        },
 
-      nextQuote: () => {
-        const { index, quotes } = get();
-        const nextIndex = (index + 1) % quotes.length;
+        setIndex: (i) =>
+          set({
+            index: i,
+            quote: quotes[i],
+          }),
 
-        set({
-          index: nextIndex,
-          quote: quotes[nextIndex],
-        });
-      },
+        nextQuote: () => {
+          const { index, quotes } = get();
+          const nextIndex = (index + 1) % quotes.length;
 
-      prevQuote: () => {
-        const { index, quotes } = get();
-        const prevIndex = (index - 1 + quotes.length) % quotes.length;
+          set({
+            index: nextIndex,
+            quote: quotes[nextIndex],
+          });
+        },
 
-        set({
-          index: prevIndex,
-          quote: quotes[prevIndex],
-        });
-      },
-    }),
+        prevQuote: () => {
+          const { index, quotes } = get();
+          const prevIndex = (index - 1 + quotes.length) % quotes.length;
+
+          set({
+            index: prevIndex,
+            quote: quotes[prevIndex],
+          });
+        },
+      };
+    },
     {
       name: "quote-store",
       storage: createJSONStorage(() => AsyncStorage), // or any other storage mechanism
